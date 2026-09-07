@@ -64,6 +64,7 @@ function render() {
   const openMenus = new Set([...document.querySelectorAll('.row-menu[open]')].map((node) => node.id));
   const state = store.getState();
   const members = state.household.members;
+  $('#today-label').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
   $('#household-name').textContent = state.household.name || 'Your household';
   const nameInput = $('#household-form').elements.name;
   if (document.activeElement !== nameInput) nameInput.value = state.household.name;
@@ -92,7 +93,7 @@ function render() {
   });
 
   const filter = $('#member-filter').value;
-  const chores = state.chores.filter((chore) => !filter || chore.assignedMemberId === filter)
+  const chores = state.chores.filter((chore) => !filter || domain.displayedMemberId(chore, members) === filter)
     .sort((a, b) => domain.displayedDate(a).localeCompare(domain.displayedDate(b)));
   $('#chore-count').textContent = `${chores.length} ${chores.length === 1 ? 'chore' : 'chores'}`;
   const list = $('#chore-list');
@@ -110,7 +111,8 @@ function render() {
     if (section !== group) { list.append(element('h3', section, 'list-heading')); group = section; }
     const row = element('article', undefined, 'chore-row');
     const description = element('div', undefined, 'chore-description');
-    const assigned = members.find((member) => member.id === chore.assignedMemberId)?.name || 'Unassigned';
+    const displayedMemberId = domain.displayedMemberId(chore, members);
+    const assigned = members.find((member) => member.id === displayedMemberId)?.name || 'Unassigned';
     description.append(element('h4', chore.name), element('p', `${assigned} · ${frequency(chore)}`),
       element('p', `${chore.completed ? 'Next' : 'Due'}: ${formatDate(due)}`, 'due-date'));
     const status = domain.status(chore);
@@ -197,6 +199,13 @@ function choosePerson(action, chore) {
   dialog.showModal();
 }
 $('#cancel-person').addEventListener('click', () => dialog.close());
+dialog.addEventListener('close', () => {
+  if (!personAction) return;
+  const prefix = personAction.action === 'complete' ? 'done' : 'options';
+  const trigger = document.getElementById(`${prefix}-${personAction.id}`);
+  if (trigger && !trigger.disabled) trigger.focus();
+  else $('#chores-heading').focus();
+});
 $('#person-form').addEventListener('submit', (event) => {
   event.preventDefault();
   try {

@@ -2,8 +2,8 @@
 
 Based on `_docs/plan.md`, ordered for implementation.
 
-Status: tasks 1–6 implemented. Django checks and route tests, 20 JavaScript
-domain/storage tests, and Chromium workflow checks pass. Desktop and mobile
+Status: tasks 1–7 implemented. Django checks and route tests, JavaScript
+domain/storage tests, and repository-managed Chromium workflow checks cover the app. Desktop and mobile
 screenshots reviewed. See `README.md` for startup and the implemented rules.
 
 ## Scope
@@ -103,3 +103,29 @@ Acceptance criteria:
   transitions; document local startup and the browser-only storage limitation.
 - Keep authentication, notifications, synchronization, and all other excluded
   features outside this backlog.
+
+## 7. Refine visual design and usability — complete
+
+Give the dashboard a cohesive, welcoming visual identity while retaining its
+compact list and existing workflows. Use a restrained palette, clearer type and
+spacing, a lightweight local SVG logo/illustration, and consistent controls.
+
+Acceptance criteria:
+- Chores and primary actions remain easy to find in empty and populated states.
+- Statuses retain text and symbols; inputs keep visible labels and keyboard focus.
+- Controls provide at least 44px touch targets, and layouts fit narrow screens.
+- Decorative assets are local, lightweight, and ignored by assistive technology.
+- Review desktop/mobile screenshots and run Django, unit, and browser tests.
+- Preserve stored household data, scheduling, and all existing actions.
+
+Delivered: ivory and forest-green styling, clearer typography, local house logo
+and illustration, prominent Add Chore action, section navigation, and consistent
+44px controls. Mobile form inputs use 16px text. Empty/populated desktop and mobile
+screenshots reviewed; core text/status contrast checked. All 2 Django tests,
+54 JavaScript unit tests, and 19 browser scenarios pass after the redesign.
+
+## 8. Preview the next assignee after completion — complete
+
+Completed rows now show the next rotation member while retaining the current
+occurrence assignee and history snapshot in storage. This keeps the upcoming date
+useful without advancing rotation before that date begins.

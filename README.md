@@ -37,6 +37,9 @@ recent 20. Reassign a member's chores before removing them.
   the month's last day when needed.
 - The first due date is today or the next date matching the recurrence. Completed
   chores stay visible until the next recurrence, when the next member takes over.
+- A completed row previews the next rotation member alongside its next date. The
+  stored current occurrence and history still retain the person who did the chore;
+  the assignment changes when that next occurrence begins.
 - Overdue chores keep their current occurrence and assignee. Completing overdue
   work schedules the next future recurrence; missed occurrences do not accumulate.
 - Initially unassigned chores get the first member at their next recurrence.
@@ -56,11 +59,39 @@ visible error. Storage access or write failures also display an error. Reload af
 resolving storage issues. Other tabs refresh when saved state changes; unsaved chore
 edits are closed to avoid editing an outdated occurrence.
 
-Run Django's system checks:
+## Tests
+
+Run the Django route and static asset tests:
 
 ```bash
-uv run python manage.py check
 uv run python manage.py test
+```
+
+Run the scheduling, rotation, validation, history, and storage unit tests with
+Node.js 22 or later (no npm dependencies required):
+
+```bash
 node --test chores/js_tests/*.test.mjs
 TZ=America/New_York node --test chores/js_tests/*.test.mjs
 ```
+
+Install the browser test tools once, then run the browser suite:
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm run test:browser
+```
+
+The browser suite starts and stops its own Django server on `127.0.0.1:8001`;
+leave that port free. It uses isolated browser contexts, so your household at
+port 8000 is unaffected. Python dependencies must already be installed with
+`uv sync --locked`. Browser tooling is only needed for development and tests.
+
+Browser tests cover setup, CRUD and cancellation, assignment, history limits,
+sorting/filtering, midnight and daylight-saving transitions, storage failures,
+two-tab updates, keyboard focus, and mobile/tablet/desktop layouts. Failures save
+screenshots and traces under the ignored `test-results/` directory.
+
+`uv run python manage.py test` runs only Django's Python tests. Run both the Node
+unit tests and browser suite to verify the browser-side application behavior too.

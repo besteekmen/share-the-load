@@ -5,20 +5,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Share the load</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'chores/mark.svg' %}">
   <link rel="stylesheet" href="{% static 'chores/dashboard.css' %}">
   <script type="module" src="{% static 'chores/dashboard.js' %}"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to dashboard</a>
-  <header><span class="brand">Share the load</span><p>A little together goes a long way.</p></header>
+  <header>
+    <a class="brand" href="#main"><img src="{% static 'chores/mark.svg' %}" width="40" height="40" alt=""><span>share the load<span class="brand-note">A little together goes a long way.</span></span></a>
+    <nav aria-label="Dashboard sections"><a href="#chores-heading">Chores</a><a href="#members-heading">Household</a><a href="#history-heading">History</a></nav>
+  </header>
   <main id="main">
-    <div class="intro"><p class="eyebrow">YOUR SHARED HOME</p><h1 id="household-name">Your household</h1><p>A space for the everyday things you share.</p></div>
+    <div class="intro">
+      <div class="intro-copy"><p class="eyebrow">A HOME, SHARED</p><h1 id="household-name">Your household</h1><p>Less on one plate. More done together.</p><p id="today-label" class="today-label"></p></div>
+      <img class="home-scene" src="{% static 'chores/home-scene.svg' %}" width="260" height="170" alt="">
+    </div>
     <noscript><p class="notice">Enable JavaScript to load and save your household in this browser.</p></noscript>
     <p id="storage-error" class="notice" role="alert" hidden></p>
     <p id="message" role="status" tabindex="-1" hidden></p>
     <div class="layout">
-      <section aria-labelledby="chores-heading">
-        <div class="section-heading"><h2 id="chores-heading" tabindex="-1">Chores</h2><span id="chore-count">0 chores</span></div>
+      <section class="chores-panel" aria-labelledby="chores-heading">
+        <div class="section-heading"><div><p class="eyebrow">THE EVERYDAY, ORGANIZED</p><h2 id="chores-heading" tabindex="-1">Chores</h2></div><span id="chore-count" class="count-badge">0 chores</span></div>
         <details id="chore-editor">
           <summary id="editor-summary">+ Add Chore</summary>
           <form id="chore-form">
@@ -40,16 +47,16 @@
           <button id="dismiss-suggestions" type="button">Dismiss suggestions</button>
         </aside>
       </section>
-      <section aria-labelledby="members-heading">
-        <h2 id="members-heading">Household members</h2>
+      <section class="household-panel" aria-labelledby="members-heading">
+        <p class="eyebrow">BETTER TOGETHER</p><h2 id="members-heading">Household members</h2>
         <form id="household-form"><label>Household name<input name="name" required maxlength="100" placeholder="Give your home a name"></label><button type="submit">Save household name</button></form>
-        <h3>Rotation order</h3><p class="hint">Each chore moves to the next person when its next occurrence begins.</p>
+        <h3 class="rotation-heading"><span aria-hidden="true">↻</span> Rotation order</h3><p class="hint">Each chore moves to the next person when its next occurrence begins.</p>
         <ol id="member-list"></ol>
         <form id="member-form"><label>New member<input name="name" required maxlength="100" autocomplete="off"></label><button type="submit">Add member</button></form>
       </section>
     </div>
-    <section class="history" aria-labelledby="history-heading"><h2 id="history-heading">Completion history</h2><details><summary>View history</summary><div id="history-list"><p>No completions yet.</p></div></details></section>
-    <footer>Saved in this browser. Household data is not shared across devices.</footer>
+    <section class="history" aria-labelledby="history-heading"><div><p class="eyebrow">THE LITTLE THINGS ADD UP</p><h2 id="history-heading">Completion history</h2></div><details><summary>View history</summary><div id="history-list"><p>No completions yet.</p></div></details></section>
+    <footer><span class="footer-mark" aria-hidden="true">⌂</span> Saved in this browser. Household data is not shared across devices.</footer>
   </main>
   <dialog id="person-dialog" aria-labelledby="person-title">
     <form id="person-form"><h2 id="person-title">Reassign chore</h2><p id="person-help"></p><label>Household member<select id="person-select" name="memberId"></select></label><p id="person-error" role="alert" hidden></p><div class="actions"><button class="primary" type="submit">Save</button><button id="cancel-person" type="button">Cancel</button></div></form>

@@ -68,10 +68,11 @@ export function removeMember(state, memberId) {
   members.splice(index, 1);
 }
 function fields(state, input) {
+  const scheduleNumber = (value) => value === null || value === undefined || String(value).trim() === '' ? NaN : Number(value);
   const result = {
     name: name(input.name), frequency: input.frequency,
-    weekday: input.frequency === 'weekly' ? Number(input.weekday) : null,
-    dayOfMonth: input.frequency === 'monthly' ? Number(input.dayOfMonth) : null,
+    weekday: input.frequency === 'weekly' ? scheduleNumber(input.weekday) : null,
+    dayOfMonth: input.frequency === 'monthly' ? scheduleNumber(input.dayOfMonth) : null,
     assignedMemberId: input.assignedMemberId || null,
   };
   if (!validRule(result)) throw new Error('Choose a valid recurrence schedule.');
@@ -118,6 +119,7 @@ export function completeChore(state, choreId, completedBy = null, now = new Date
   current.completed = true;
   current.completedAt = now.toISOString();
   current.awaitingFirstAssignment = false;
+  if (!current.rotationMemberId) current.rotationMemberId = person.id;
   current.nextOccurrenceDate = nextDate(current, current.dueDate > localDate(now) ? current.dueDate : localDate(now));
   state.history.unshift({ id: id(), choreName: current.name, memberName: person.name, completedAt: current.completedAt });
   state.history = state.history.slice(0, 20);
@@ -153,3 +155,8 @@ export function status(current, today = localDate()) {
   return current.completed ? 'Done' : current.dueDate < today ? 'Overdue' : 'To Do';
 }
 export function displayedDate(current) { return current.completed ? current.nextOccurrenceDate : current.dueDate; }
+export function displayedMemberId(current, members) {
+  if (!current.completed || !current.rotationMemberId || !members.length) return current.assignedMemberId;
+  const index = members.findIndex((item) => item.id === current.rotationMemberId);
+  return index < 0 ? current.assignedMemberId : members[(index + 1) % members.length].id;
+}

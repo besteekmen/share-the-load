@@ -1,0 +1,11 @@
+{
+  "name": "share-the-load-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test chores/js_tests/*.test.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
