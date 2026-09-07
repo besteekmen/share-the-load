@@ -129,3 +129,43 @@ screenshots reviewed; core text/status contrast checked. All 2 Django tests,
 Completed rows now show the next rotation member while retaining the current
 occurrence assignee and history snapshot in storage. This keeps the upcoming date
 useful without advancing rotation before that date begins.
+
+## 9. Add shared household accounts and server persistence — complete
+
+Replace browser-only persistence for signed-in users with one Django `Household`
+record per account. Use Django's built-in authentication for signup, sign-in, and
+sign-out. Every household member can use the same credentials to see and update the
+same chore state across devices; anonymous visitors may continue using local-only
+mode during the transition.
+
+Acceptance criteria:
+- Signup creates a user and an empty household; sign-in and sign-out work.
+- Authenticated dashboard state loads from and saves to the owning household.
+- Accounts cannot read or write another account's state.
+- Invalid API payloads and unauthenticated state requests are rejected.
+- Authentication screens match the dashboard's visual language and remain usable
+  on mobile and by keyboard.
+- Add Django authentication/API tests and update browser coverage for the account
+  flow. Use SQLite locally and keep the schema compatible with hosted Postgres.
+
+Implementation note: production deployment should use a managed Postgres service
+such as Supabase's free tier (500 MB per project, with inactivity pausing) rather
+than relying on an ephemeral hosting filesystem. Configure that database through
+the deployment environment when hosting is added.
+
+Delivered: Django signup, sign-in, sign-out, per-user `Household` records, a
+CSRF-protected state API, authenticated server-backed dashboard persistence, and
+separate browser coverage for shared credentials across contexts.
+
+## 10. Make account authentication the only dashboard entry point — complete
+
+Require sign-in or signup before showing the dashboard and remove browser
+`localStorage` from the production dashboard flow. Keep household state in the
+authenticated Django API so every session reads and writes the same database
+record without a second client-side copy that can become stale.
+
+Acceptance criteria:
+- Anonymous requests to `/` redirect to the sign-in page.
+- The dashboard has no localStorage dependency or browser-only persistence copy.
+- Signup, sign-in, sign-out, and shared database persistence continue to work.
+- Tests cover the protected route and database-backed dashboard updates.

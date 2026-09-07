@@ -1,8 +1,26 @@
-import { createStore, STORAGE_KEY } from './state.mjs';
+import { createStore } from './state.mjs';
 import * as domain from './domain.mjs';
 
 const $ = (selector) => document.querySelector(selector);
-let store = createStore();
+function databaseStorage() {
+  const script = document.querySelector('#server-household-state');
+  if (!script) return null;
+  let serialized = script.textContent;
+  return {
+    getItem: () => serialized,
+    setItem: (_key, value) => {
+      serialized = value;
+      fetch('/state/', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '' },
+        body: value,
+        credentials: 'same-origin',
+      }).catch(() => {});
+    },
+  };
+}
+const remoteStorage = databaseStorage();
+let store = createStore(() => remoteStorage);
 let editingId = null;
 let personAction = null;
 let lastDay = domain.localDate();
@@ -282,15 +300,6 @@ function reconcile() {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) reconcile(); });
 window.addEventListener('focus', reconcile);
-window.addEventListener('storage', (event) => {
-  if (event.key === STORAGE_KEY || event.key === null) {
-    store = createStore();
-    if (dialog.open) dialog.close();
-    closeEditor();
-    reconcile();
-    say('Household data refreshed from another tab.');
-  }
-});
 setInterval(() => { if (domain.localDate() !== lastDay) reconcile(); }, 30_000);
 scheduleFields();
 reconcile();

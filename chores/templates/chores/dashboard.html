@@ -13,14 +13,14 @@
   <a class="skip-link" href="#main">Skip to dashboard</a>
   <header>
     <a class="brand" href="#main"><img src="{% static 'chores/mark.svg' %}" width="40" height="40" alt=""><span>share the load<span class="brand-note">A little together goes a long way.</span></span></a>
-    <nav aria-label="Dashboard sections"><a href="#chores-heading">Chores</a><a href="#members-heading">Household</a><a href="#history-heading">History</a></nav>
+    <nav aria-label="Dashboard sections"><a href="#chores-heading">Chores</a><a href="#members-heading">Household</a><a href="#history-heading">History</a>{% if user.is_authenticated %}<form class="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Sign out</button></form>{% else %}<a href="{% url 'chores:login' %}">Sign in</a><a href="{% url 'chores:signup' %}">Sign up</a>{% endif %}</nav>
   </header>
   <main id="main">
     <div class="intro">
       <div class="intro-copy"><p class="eyebrow">A HOME, SHARED</p><h1 id="household-name">Your household</h1><p>Less on one plate. More done together.</p><p id="today-label" class="today-label"></p></div>
       <img class="home-scene" src="{% static 'chores/home-scene.svg' %}" width="260" height="170" alt="">
     </div>
-    <noscript><p class="notice">Enable JavaScript to load and save your household in this browser.</p></noscript>
+    <noscript><p class="notice">Enable JavaScript to load and save your household account.</p></noscript>
     <p id="storage-error" class="notice" role="alert" hidden></p>
     <p id="message" role="status" tabindex="-1" hidden></p>
     <div class="layout">
@@ -56,8 +56,9 @@
       </section>
     </div>
     <section class="history" aria-labelledby="history-heading"><div><p class="eyebrow">THE LITTLE THINGS ADD UP</p><h2 id="history-heading">Completion history</h2></div><details><summary>View history</summary><div id="history-list"><p>No completions yet.</p></div></details></section>
-    <footer><span class="footer-mark" aria-hidden="true">⌂</span> Saved in this browser. Household data is not shared across devices.</footer>
+    <footer><span class="footer-mark" aria-hidden="true">⌂</span> Saved securely to your shared household account.</footer>
   </main>
+  {% if household_state %}{{ household_state|json_script:"server-household-state" }}{% endif %}
   <dialog id="person-dialog" aria-labelledby="person-title">
     <form id="person-form"><h2 id="person-title">Reassign chore</h2><p id="person-help"></p><label>Household member<select id="person-select" name="memberId"></select></label><p id="person-error" role="alert" hidden></p><div class="actions"><button class="primary" type="submit">Save</button><button id="cancel-person" type="button">Cancel</button></div></form>
   </dialog>

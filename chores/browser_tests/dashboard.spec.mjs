@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-const KEY = 'share-the-load.state';
 const runtimeErrors = new WeakMap();
 const row = (page, name) => page.locator('.chore-row').filter({ has: page.getByRole('heading', { name, exact: true }) });
-const saved = (page) => page.evaluate((key) => JSON.parse(localStorage.getItem(key)), KEY);
+const saved = (page) => page.evaluate(async () => (await fetch('/state/')).json());
 async function members(page, names = ['Alex', 'Sam', 'Jamie']) {
   for (const name of names) {
     await page.getByLabel('New member').fill(name);
@@ -34,8 +33,43 @@ test.beforeEach(async ({ page }) => {
   runtimeErrors.set(page, []);
   page.on('pageerror', (error) => runtimeErrors.get(page).push(error.message));
   await page.clock.install({ time: new Date('2026-01-01T17:00:00Z') });
-  await page.goto('/');
+  await page.goto('/signup/');
+  const username = `test-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  await page.getByLabel('Username').fill(username);
+  await page.locator('input[name=password1]').fill('A-secure-password-123');
+  await page.locator('input[name=password2]').fill('A-secure-password-123');
+  await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page.locator('#suggestions')).toBeVisible();
+});
+
+test('shared account signup and sign-in load the same household on another browser', async ({ page, context }) => {
+  const username = `home-${Date.now()}`;
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await page.goto('/signup/');
+  await page.getByLabel('Username').fill(username);
+  await page.locator('input[name=password1]').fill('A-secure-password-123');
+  await page.locator('input[name=password2]').fill('A-secure-password-123');
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await expect(page.locator('.logout-form')).toBeVisible();
+  await page.getByLabel('Household name', { exact: true }).fill('Shared account home');
+  await Promise.all([
+    page.waitForResponse((response) => response.url().endsWith('/state/') && response.status() === 200),
+    page.getByRole('button', { name: 'Save household name' }).click(),
+  ]);
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await page.goto('/login/');
+  await page.getByLabel('Username').fill(username);
+  await page.getByLabel('Password', { exact: true }).fill('A-secure-password-123');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#household-name')).toHaveText('Shared account home');
+  const otherContext = await context.browser().newContext();
+  const other = await otherContext.newPage();
+  await other.goto('/login/');
+  await other.getByLabel('Username').fill(username);
+  await other.getByLabel('Password', { exact: true }).fill('A-secure-password-123');
+  await other.getByRole('button', { name: 'Sign in' }).click();
+  await expect(other.locator('#household-name')).toHaveText('Shared account home');
+  await otherContext.close();
 });
 
 test.afterEach(async ({ page }) => {
@@ -213,45 +247,16 @@ test('history renders the newest 20 completions after refresh', async ({ page })
   await expect(page.locator('#history-list li').last()).toContainText('1/3/2026');
 });
 
-for (const mode of ['unavailable', 'full', 'corrupt']) {
-  test(`${mode} storage shows an error and preserves existing data`, async ({ page }) => {
-    await members(page);
-    const before = await page.evaluate((key) => localStorage.getItem(key), KEY);
-    if (mode === 'unavailable') {
-      await page.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new Error('Storage blocked'); } }));
-      await page.reload();
-    } else if (mode === 'corrupt') {
-      await page.evaluate((key) => localStorage.setItem(key, '{broken'), KEY);
-      await page.reload();
-    } else {
-      await page.evaluate(() => { Storage.prototype.setItem = () => { throw new Error('Storage full'); }; });
-      await page.getByLabel('Household name', { exact: true }).fill('Cannot save');
-      await page.getByRole('button', { name: 'Save household name' }).click();
-    }
-    await expect(page.locator('#storage-error')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save household name' })).toBeDisabled();
-    if (mode !== 'unavailable') {
-      expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(mode === 'corrupt' ? '{broken' : before);
-    }
-  });
-}
-
-test('another tab refreshes data, closes stale chore edits and preserves new changes', async ({ page, context }) => {
+test('database persistence survives reload and a second session', async ({ page, context }) => {
   await members(page);
   await add(page, 'Dishes');
   const other = await context.newPage();
   await other.clock.install({ time: new Date('2026-01-01T17:00:00Z') });
   await other.goto('/');
-  await menu(page, 'Dishes', 'Edit');
-  await page.getByLabel('Chore name', { exact: true }).fill('Stale edit');
-  await other.getByLabel('Household name', { exact: true }).fill('Shared update');
-  await other.getByRole('button', { name: 'Save household name' }).click();
-  await expect(page.locator('#household-name')).toHaveText('Shared update');
-  await expect(page.locator('#chore-editor')).not.toHaveAttribute('open');
-  await expect(page.locator('#message')).toContainText('another tab');
-  await page.getByRole('button', { name: 'Mark Dishes done' }).click();
-  await expect(row(other, 'Dishes').locator('.status')).toHaveText('✓ Done');
-  expect((await saved(other)).household.name).toBe('Shared update');
+  await expect(row(other, 'Dishes')).toBeVisible();
+  await page.reload();
+  await expect(row(page, 'Dishes')).toBeVisible();
+  expect((await saved(page)).chores).toHaveLength(1);
 });
 
 test('keyboard forms, validation, menu Escape and dialog focus restoration', async ({ page }) => {

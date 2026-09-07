@@ -12,6 +12,7 @@
   font-synthesis: none;
 }
 * { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
 [hidden] { display: none !important; }
 body { margin: 0; }
 header, main { max-width: 1160px; margin: auto; padding: 24px 32px; }
@@ -23,6 +24,9 @@ a { color: var(--green); }
 nav { display: flex; gap: 8px; }
 nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: .85rem; font-weight: 600; }
 nav a:hover { background: #e8ecdf; }
+.logout-form { display: inline; margin: 0; }
+.logout-form button { min-height: 44px; padding: 8px 14px; border: 0; background: transparent; }
+.logout-form button:hover { background: #e8ecdf; }
 p { color: var(--muted); line-height: 1.6; }
 .intro { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 12px 12px 32px; }
 .intro-copy { min-width: 0; }
@@ -127,6 +131,13 @@ dialog::backdrop { background: #1b302b88; }
 dialog h2 { margin: 0; overflow-wrap: anywhere; font-size: 1.35rem; }
 dialog p { font-size: .85rem; margin: 0; }
 dialog form { margin: 0; gap: 20px; }
+.auth-shell { max-width: 560px; min-height: 100vh; padding-top: 48px; }
+.auth-card { margin-top: 40px; padding: 32px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 10px 36px #263b3208; }
+.auth-card h1 { font-size: clamp(2rem, 6vw, 3rem); }
+.auth-card form { margin-top: 28px; }
+.auth-card p { font-size: .9rem; }
+.field-error { color: #913f25; }
+.auth-card ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: .8rem; font-weight: 400; }
 #person-error { color: #913f25; }
 .skip-link { position: absolute; left: 16px; top: -100px; z-index: 5; padding: 12px; background: var(--paper); }
 .skip-link:focus { top: 12px; }
@@ -162,6 +173,8 @@ dialog form { margin: 0; gap: 20px; }
   .home-scene { width: 88px; margin-top: 25px; }
   .eyebrow { font-size: .6rem; letter-spacing: .1em; }
   section { padding: 20px 16px; border-radius: 12px; }
+  .auth-shell { padding: 24px 16px; }
+  .auth-card { margin-top: 28px; padding: 24px 18px; }
   .form-grid { grid-template-columns: 1fr; }
   .chore-row { flex-wrap: wrap; gap: 10px; }
   .chore-description { flex: 1 1 150px; }
