@@ -1,6 +1,6 @@
 <div align="center">
   <img src="chores/static/chores/mark.svg" alt="Share the load house mark" width="76" height="76">
-  <h1>🏠 share the load</h1>
+  <h1>share the load</h1>
   <p>A calm, practical way for a household to share recurring chores.</p>
   <p>
     <a href="#quick-start">Quick start</a> ·
