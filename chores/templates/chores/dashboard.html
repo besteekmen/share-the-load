@@ -1,0 +1,58 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Share the load</title>
+  <link rel="stylesheet" href="{% static 'chores/dashboard.css' %}">
+  <script type="module" src="{% static 'chores/dashboard.js' %}"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <header><span class="brand">Share the load</span><p>A little together goes a long way.</p></header>
+  <main id="main">
+    <div class="intro"><p class="eyebrow">YOUR SHARED HOME</p><h1 id="household-name">Your household</h1><p>A space for the everyday things you share.</p></div>
+    <noscript><p class="notice">Enable JavaScript to load and save your household in this browser.</p></noscript>
+    <p id="storage-error" class="notice" role="alert" hidden></p>
+    <p id="message" role="status" tabindex="-1" hidden></p>
+    <div class="layout">
+      <section aria-labelledby="chores-heading">
+        <div class="section-heading"><h2 id="chores-heading" tabindex="-1">Chores</h2><span id="chore-count">0 chores</span></div>
+        <details id="chore-editor">
+          <summary id="editor-summary">+ Add Chore</summary>
+          <form id="chore-form">
+            <label>Chore name<input name="name" required maxlength="100" autocomplete="off"></label>
+            <div class="form-grid">
+              <label>Frequency<select name="frequency"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></label>
+              <label id="weekday-field" hidden>Weekday<select name="weekday"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option></select></label>
+              <label id="monthday-field" hidden>Day of month<input name="dayOfMonth" type="number" min="1" max="31" value="1"><small>Uses the last day in shorter months.</small></label>
+              <label>Assigned person<select name="assignedMemberId" id="chore-assignee"><option value="">Unassigned</option></select></label>
+            </div>
+            <p id="edit-note" hidden>Changing the schedule starts a fresh occurrence. Reassignment affects only the current occurrence.</p>
+            <div class="actions"><button class="primary" type="submit">Save chore</button><button id="cancel-edit" type="button">Cancel</button></div>
+          </form>
+        </details>
+        <label class="filter">Filter by person<select id="member-filter"><option value="">All members</option></select></label>
+        <div id="chore-list"><div class="empty"><h3>No chores yet</h3><p>Your shared to-do list will live here.</p></div></div>
+        <aside id="suggestions" aria-label="Chore suggestions" hidden>
+          <p>Some ideas to get you started</p><ul class="suggestions"><li>Dishes</li><li>Trash</li><li>Vacuuming</li></ul>
+          <button id="dismiss-suggestions" type="button">Dismiss suggestions</button>
+        </aside>
+      </section>
+      <section aria-labelledby="members-heading">
+        <h2 id="members-heading">Household members</h2>
+        <form id="household-form"><label>Household name<input name="name" required maxlength="100" placeholder="Give your home a name"></label><button type="submit">Save household name</button></form>
+        <h3>Rotation order</h3><p class="hint">Each chore moves to the next person when its next occurrence begins.</p>
+        <ol id="member-list"></ol>
+        <form id="member-form"><label>New member<input name="name" required maxlength="100" autocomplete="off"></label><button type="submit">Add member</button></form>
+      </section>
+    </div>
+    <section class="history" aria-labelledby="history-heading"><h2 id="history-heading">Completion history</h2><details><summary>View history</summary><div id="history-list"><p>No completions yet.</p></div></details></section>
+    <footer>Saved in this browser. Household data is not shared across devices.</footer>
+  </main>
+  <dialog id="person-dialog" aria-labelledby="person-title">
+    <form id="person-form"><h2 id="person-title">Reassign chore</h2><p id="person-help"></p><label>Household member<select id="person-select" name="memberId"></select></label><p id="person-error" role="alert" hidden></p><div class="actions"><button class="primary" type="submit">Save</button><button id="cancel-person" type="button">Cancel</button></div></form>
+  </dialog>
+</body>
+</html>
